@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Diagnostics;
 using System.Net;
 using System.Net.Http;
@@ -12,26 +11,24 @@ namespace git_hub_app
 {
     public partial class User_Login : Form
     {
-        // Your GitHub OAuth credentials
-        private string clientId = "Ov23liohF6RYuO1rpxnC"; //Change this is actual client ID
-        private string clientSecret = "46f35ba7ffcee17ca9fa62d9bd379d6ce3bc69db"; //this is actual client secret, do not share it publicly
+        private string clientId = "Ov23liohF6RYuO1rpxnC"; // Keep only the client ID (it's safe to share)
         private string redirectUri = "http://localhost:5000/callback";
+        private string backendTokenExchangeUrl = "https://git-hub-app-93qb.onrender.com/auth/github";
 
         public User_Login()
         {
             InitializeComponent();
         }
 
-
         private async Task<string> LoginAsync()
         {
             string state = Guid.NewGuid().ToString("N");
             string authUrl = $"https://github.com/login/oauth/authorize?client_id={clientId}&redirect_uri={redirectUri}&scope=read:user&state={state}";
 
-            // Open browser
+            // Open GitHub OAuth login in browser
             Process.Start(new ProcessStartInfo(authUrl) { UseShellExecute = true });
 
-            // Start local server for redirect
+            // Start localhost listener for GitHub redirect
             var http = new HttpListener();
             http.Prefixes.Add("http://localhost:5000/callback/");
             http.Start();
@@ -50,19 +47,12 @@ namespace git_hub_app
 
             if (state != receivedState) return null;
 
+            // Call your backend to exchange code for token
             using (HttpClient client = new HttpClient())
             {
-                var postData = new FormUrlEncodedContent(new[]
-                {
-                    new KeyValuePair<string, string>("client_id", clientId),
-                    new KeyValuePair<string, string>("client_secret", clientSecret),
-                    new KeyValuePair<string, string>("code", code),
-                    new KeyValuePair<string, string>("redirect_uri", redirectUri)
-                });
-
-                client.DefaultRequestHeaders.Accept.ParseAdd("application/json");
-                var response = await client.PostAsync("https://github.com/login/oauth/access_token", postData);
-                var content = await response.Content.ReadAsStringAsync();
+                string requestUrl = $"{backendTokenExchangeUrl}?code={code}";
+                var response = await client.GetAsync(requestUrl);
+                string content = await response.Content.ReadAsStringAsync();
                 var tokenData = JObject.Parse(content);
 
                 return tokenData["access_token"]?.ToString();
@@ -77,7 +67,8 @@ namespace git_hub_app
             {
                 using (HttpClient client = new HttpClient())
                 {
-                    client.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", token);
+                    client.DefaultRequestHeaders.Authorization =
+                        new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", token);
                     client.DefaultRequestHeaders.UserAgent.ParseAdd("DevConnectDesktop");
 
                     string json = await client.GetStringAsync("https://api.github.com/user");
@@ -89,7 +80,7 @@ namespace git_hub_app
                     string avatarUrl = user["avatar_url"]?.ToString();
                     string bio = user["bio"]?.ToString();
 
-                    // Open profile form
+                    // Show profile
                     User_Profile profileForm = new User_Profile(username, name, email, avatarUrl, bio);
                     profileForm.Show();
                     this.Hide();
