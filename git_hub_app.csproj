@@ -33,6 +33,9 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="Newtonsoft.Json, Version=13.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
+      <HintPath>packages\Newtonsoft.Json.13.0.3\lib\net45\Newtonsoft.Json.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Xml.Linq" />
@@ -46,16 +49,28 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="WelcomeScreen.cs">
+    <Compile Include="User_Dashboard.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="WelcomeScreen.Designer.cs">
-      <DependentUpon>WelcomeScreen.cs</DependentUpon>
+    <Compile Include="User_Dashboard.Designer.cs">
+      <DependentUpon>User_Dashboard.cs</DependentUpon>
+    </Compile>
+    <Compile Include="User_Profile.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="User_Profile.Designer.cs">
+      <DependentUpon>User_Profile.cs</DependentUpon>
+    </Compile>
+    <Compile Include="User_Login.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="User_Login.Designer.cs">
+      <DependentUpon>User_Login.cs</DependentUpon>
     </Compile>
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <EmbeddedResource Include="WelcomeScreen.resx">
-      <DependentUpon>WelcomeScreen.cs</DependentUpon>
+    <EmbeddedResource Include="User_Login.resx">
+      <DependentUpon>User_Login.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Properties\Resources.resx">
       <Generator>ResXFileCodeGenerator</Generator>
@@ -66,6 +81,10 @@
       <AutoGen>True</AutoGen>
       <DependentUpon>Resources.resx</DependentUpon>
     </Compile>
+    <EmbeddedResource Include="User_Profile.resx">
+      <DependentUpon>User_Profile.cs</DependentUpon>
+    </EmbeddedResource>
+    <None Include="packages.config" />
     <None Include="Properties\Settings.settings">
       <Generator>SettingsSingleFileGenerator</Generator>
       <LastGenOutput>Settings.Designer.cs</LastGenOutput>

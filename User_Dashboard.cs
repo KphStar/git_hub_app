@@ -10,9 +10,9 @@ using System.Windows.Forms;
 
 namespace git_hub_app
 {
-    public partial class WelcomeScreen : Form
+    public partial class User_Dashboard : Form
     {
-        public WelcomeScreen()
+        public User_Dashboard()
         {
             InitializeComponent();
         }

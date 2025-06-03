@@ -1,6 +1,6 @@
 ﻿namespace git_hub_app
 {
-    partial class WelcomeScreen
+    partial class User_Dashboard
     {
         /// <summary>
         /// Required designer variable.
@@ -28,20 +28,12 @@
         /// </summary>
         private void InitializeComponent()
         {
-            this.SuspendLayout();
-            // 
-            // WelcomeScreen
-            // 
-            this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
+            this.components = new System.ComponentModel.Container();
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(1160, 554);
-            this.Name = "WelcomeScreen";
-            this.Text = "Welcome Screen";
-            this.ResumeLayout(false);
-
+            this.ClientSize = new System.Drawing.Size(800, 450);
+            this.Text = "Dashboard";
         }
 
         #endregion
     }
 }
-
