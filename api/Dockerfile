@@ -1,8 +1,9 @@
-FROM node:18
+FROM node:20.19.2-slim
 
 WORKDIR /usr/src/app
 
 COPY . .
+
 RUN npm install
 
-CMD ["npm", "start"]
+CMD ["node", "server.js"]
