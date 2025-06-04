@@ -1,11 +1,12 @@
-﻿using System;
+﻿using Newtonsoft.Json.Linq;
+using System;
 using System.Diagnostics;
+using System.Drawing;
 using System.Net;
 using System.Net.Http;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
-using Newtonsoft.Json.Linq;
 
 namespace git_hub_app
 {
@@ -18,6 +19,8 @@ namespace git_hub_app
         public User_Login()
         {
             InitializeComponent();
+
+            DrawCustomNameGrid();
         }
 
         private async Task<string> LoginAsync()
@@ -91,5 +94,135 @@ namespace git_hub_app
                 MessageBox.Show("Login failed.");
             }
         }
+
+
+
+        private Color GetLevelColor(int level)
+        {
+            if (level == 1)
+                return ColorTranslator.FromHtml("#9be9a8");
+            else if (level == 2)
+                return ColorTranslator.FromHtml("#40c463");
+            else if (level == 3)
+                return ColorTranslator.FromHtml("#30a14e");
+            else if (level == 4)
+                return ColorTranslator.FromHtml("#216e39");
+            else
+                return ColorTranslator.FromHtml("#ebedf0"); // level 0 or unknown
+        }
+
+        private async void DrawCustomNameGrid()
+        {
+            tableLayoutContrib.Controls.Clear();
+            tableLayoutContrib.ColumnStyles.Clear();
+            tableLayoutContrib.RowStyles.Clear();
+            tableLayoutContrib.AutoSize = false;
+            tableLayoutContrib.RowCount = 7;
+
+            int boxSize = 12;
+            int boxMargin = 2;
+
+            int paddingCols = 2;
+            int spacing = 2; // space between letters
+            int letterWidth = 6; // width of each letter (max)
+            int[][,] letters = new int[][,]
+            {
+        // D
+        new int[,]
+        {
+            {1,1,1},
+            {1,0,1},
+            {1,0,1},
+            {1,0,1},
+            {1,0,1},
+            {1,0,1},
+            {1,1,1}
+        },
+        // U
+        new int[,]
+        {
+            {1,0,1},
+            {1,0,1},
+            {1,0,1},
+            {1,0,1},
+            {1,0,1},
+            {1,0,1},
+            {1,1,1}
+        },
+        // C
+        new int[,]
+        {
+            {1,1,1},
+            {1,0,0},
+            {1,0,0},
+            {1,0,0},
+            {1,0,0},
+            {1,0,0},
+            {1,1,1}
+        },
+        // L
+        new int[,]
+        {
+            {1,0,0},
+            {1,0,0},
+            {1,0,0},
+            {1,0,0},
+            {1,0,0},
+            {1,0,0},
+            {1,1,1}
+        },
+        // E
+        new int[,]
+        {
+            {1,1,1},
+            {1,0,0},
+            {1,0,0},
+            {1,1,0},
+            {1,0,0},
+            {1,0,0},
+            {1,1,1}
+        }
+            };
+
+            int totalCols = paddingCols + (letters.Length * (letterWidth + spacing));
+            tableLayoutContrib.ColumnCount = totalCols;
+
+            for (int col = 0; col < totalCols; col++)
+                tableLayoutContrib.ColumnStyles.Add(new ColumnStyle(SizeType.Absolute, boxSize + boxMargin));
+            for (int row = 0; row < 7; row++)
+                tableLayoutContrib.RowStyles.Add(new RowStyle(SizeType.Absolute, boxSize + boxMargin));
+
+            int colOffset = paddingCols;
+
+            Random rnd = new Random();
+
+            foreach (var letter in letters)
+            {
+                for (int row = 0; row < letter.GetLength(0); row++)
+                {
+                    for (int col = 0; col < letter.GetLength(1); col++)
+                    {
+                        int val = letter[row, col];
+
+                        Panel square = new Panel
+                        {
+                            Width = boxSize,
+                            Height = boxSize,
+                            Margin = new Padding(1),
+                            BackColor = val == 1
+                                ? GetLevelColor(rnd.Next(1, 5))  // ✅ 1 to 4 only
+                                : Color.WhiteSmoke
+                        };
+
+                        tableLayoutContrib.Controls.Add(square, colOffset + col, row);
+                    }
+                }
+
+                colOffset += letter.GetLength(1) + spacing;
+                await Task.Delay(450);
+            }
+        }
+
+
     }
 }

@@ -1,7 +1,9 @@
 ﻿using Newtonsoft.Json.Linq;
 using System;
+using System.Data.Common;
 using System.Diagnostics;
 using System.Drawing;
+using System.IO;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
@@ -42,7 +44,13 @@ namespace git_hub_app
             }
 
             LoadPopularRepos(username);
+
+
         }
+
+        private bool dragging = false;
+        private Point dragCursorPoint;
+        private Point dragFormPoint;
 
         private Bitmap GetCircularImage(Image srcImage, int width, int height)
         {
@@ -71,7 +79,7 @@ namespace git_hub_app
 
         private void btnExit_Click(object sender, EventArgs e)
         {
-            this.Close();
+            Application.Exit();
         }
 
 
@@ -156,6 +164,31 @@ namespace git_hub_app
             return panel;
         }
 
+        private void BtnDash_Click(object sender, EventArgs e)
+        {
+            User_Dashboard user_Dashboard = new User_Dashboard();
+            user_Dashboard.Show();
+        }
 
+        private void User_Profile_MouseDown(object sender, MouseEventArgs e)
+        {
+            dragging = true;
+            dragCursorPoint = Cursor.Position;
+            dragFormPoint = this.Location;
+        }
+
+        private void User_Profile_MouseUp(object sender, MouseEventArgs e)
+        {
+            dragging = false;
+        }
+
+        private void User_Profile_MouseMove(object sender, MouseEventArgs e)
+        {
+            if (dragging)
+            {
+                Point diff = Point.Subtract(Cursor.Position, new Size(dragCursorPoint));
+                this.Location = Point.Add(dragFormPoint, new Size(diff));
+            }
+        }
     }
 }

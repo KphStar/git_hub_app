@@ -28,6 +28,7 @@
         /// </summary>
         private void InitializeComponent()
         {
+            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(User_Profile));
             this.lblUsername = new System.Windows.Forms.Label();
             this.lblName = new System.Windows.Forms.Label();
             this.lblEmail = new System.Windows.Forms.Label();
@@ -88,7 +89,7 @@
             this.textBoxBio.Multiline = true;
             this.textBoxBio.Name = "textBoxBio";
             this.textBoxBio.ReadOnly = true;
-            this.textBoxBio.Size = new System.Drawing.Size(358, 109);
+            this.textBoxBio.Size = new System.Drawing.Size(360, 120);
             this.textBoxBio.TabIndex = 5;
             // 
             // labelWelcome
@@ -104,7 +105,7 @@
             // btnExit
             // 
             this.btnExit.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-            this.btnExit.Location = new System.Drawing.Point(228, 610);
+            this.btnExit.Location = new System.Drawing.Point(228, 621);
             this.btnExit.Name = "btnExit";
             this.btnExit.Size = new System.Drawing.Size(147, 27);
             this.btnExit.TabIndex = 7;
@@ -115,12 +116,13 @@
             // BtnDash
             // 
             this.BtnDash.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-            this.BtnDash.Location = new System.Drawing.Point(17, 610);
+            this.BtnDash.Location = new System.Drawing.Point(12, 621);
             this.BtnDash.Name = "BtnDash";
             this.BtnDash.Size = new System.Drawing.Size(205, 27);
             this.BtnDash.TabIndex = 8;
             this.BtnDash.Text = "Dashboard";
             this.BtnDash.UseVisualStyleBackColor = true;
+            this.BtnDash.Click += new System.EventHandler(this.BtnDash_Click);
             // 
             // flowPanelRepos
             // 
@@ -144,7 +146,7 @@
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(1209, 649);
+            this.ClientSize = new System.Drawing.Size(1220, 685);
             this.Controls.Add(this.label1);
             this.Controls.Add(this.flowPanelRepos);
             this.Controls.Add(this.BtnDash);
@@ -156,8 +158,12 @@
             this.Controls.Add(this.lblName);
             this.Controls.Add(this.lblUsername);
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.None;
+            this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.Name = "User_Profile";
             this.Text = "User_Profile";
+            this.MouseDown += new System.Windows.Forms.MouseEventHandler(this.User_Profile_MouseDown);
+            this.MouseMove += new System.Windows.Forms.MouseEventHandler(this.User_Profile_MouseMove);
+            this.MouseUp += new System.Windows.Forms.MouseEventHandler(this.User_Profile_MouseUp);
             ((System.ComponentModel.ISupportInitialize)(this.pictureBoxAvatar)).EndInit();
             this.ResumeLayout(false);
             this.PerformLayout();
