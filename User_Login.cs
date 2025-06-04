@@ -26,7 +26,8 @@ namespace git_hub_app
         private async Task<string> LoginAsync()
         {
             string state = Guid.NewGuid().ToString("N");
-            string authUrl = $"https://github.com/login/oauth/authorize?client_id={clientId}&redirect_uri={redirectUri}&scope=read:user&state={state}";
+            // string authUrl = $"https://github.com/login/oauth/authorize?client_id={clientId}&redirect_uri={redirectUri}&scope=read:user&state={state}";
+               string authUrl = $"https://github.com/login/oauth/authorize?client_id={clientId}&redirect_uri={redirectUri}&scope=repo%20read:user&state={state}";
 
             // Open GitHub OAuth login in browser
             Process.Start(new ProcessStartInfo(authUrl) { UseShellExecute = true });
@@ -84,7 +85,7 @@ namespace git_hub_app
                     string bio = user["bio"]?.ToString();
 
                     // Show profile
-                    User_Profile profileForm = new User_Profile(username, name, email, avatarUrl, bio);
+                    User_Profile profileForm = new User_Profile(username, name, email, avatarUrl, bio, token);
                     profileForm.Show();
                     this.Hide();
                 }

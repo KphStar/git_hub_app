@@ -7,16 +7,19 @@ using System.IO;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
+using System.Threading.Tasks;
 using System.Windows.Forms;
 
 namespace git_hub_app
 {
     public partial class User_Profile : Form
     {
-        public User_Profile(string username, string name, string email, string avatarUrl, string bio)
+        private string accessToken;
+        public User_Profile(string username, string name, string email, string avatarUrl, string bio, string token)
         {
             InitializeComponent();
 
+            accessToken = token;
             lblUsername.Text = $"@{username}";
             lblName.Text = string.IsNullOrWhiteSpace(name) ? "Unknown" : name;
             lblEmail.Text = string.IsNullOrWhiteSpace(email) ? "Email: Not public" : $"Email: {email}";
@@ -43,14 +46,26 @@ namespace git_hub_app
                 MessageBox.Show("Failed to load avatar image.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Warning);
             }
 
-            LoadPopularRepos(username);
+          
+
+            _ = InitRepoPaging(); // fire and forget
 
 
+        }
+
+        private async Task InitRepoPaging()
+        {
+            await FetchAllRepos();
+            ShowRepoPage(currentPage);
         }
 
         private bool dragging = false;
         private Point dragCursorPoint;
         private Point dragFormPoint;
+
+        private JArray allRepos;
+        private int currentPage = 1;
+        private int reposPerPage = 4;
 
         private Bitmap GetCircularImage(Image srcImage, int width, int height)
         {
@@ -83,35 +98,87 @@ namespace git_hub_app
         }
 
 
-        private async void LoadPopularRepos(string username)
+  
+
+        private async Task FetchAllRepos()
         {
+            allRepos = new JArray();
+            int page = 1;
+            const int safeMaxPages = 1000;
+            const int maxReposAllowed = 100_000;
+            int totalLoaded = 0;
+
             try
             {
                 using (HttpClient client = new HttpClient())
                 {
                     client.DefaultRequestHeaders.UserAgent.ParseAdd("DevConnectApp");
-                    var response = await client.GetAsync($"https://api.github.com/users/{username}/repos?per_page=100");
+                    client.DefaultRequestHeaders.Authorization =
+                        new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", accessToken);
 
-                    string json = await response.Content.ReadAsStringAsync();
-                    JArray repos = JArray.Parse(json);
-
-                    var sortedRepos = repos.OrderByDescending(r => (int?)r["stargazers_count"] ?? 0).Take(4);
-
-                    foreach (var repo in sortedRepos)
+                    while (page <= safeMaxPages && totalLoaded < maxReposAllowed)
                     {
-                        string name = repo["name"]?.ToString();
-                        string desc = repo["description"]?.ToString() ?? "No description";
-                        string lang = repo["language"]?.ToString() ?? "Unknown";
-                        string htmlUrl = repo["html_url"]?.ToString();
+                        var response = await client.GetAsync($"https://api.github.com/user/repos?per_page=100&page={page}");
+                        string json = await response.Content.ReadAsStringAsync();
+                        var batch = JArray.Parse(json);
 
-                        var card = CreateRepoCard(name, desc, lang, htmlUrl);
-                        flowPanelRepos.Controls.Add(card);
+                        if (batch.Count == 0)
+                            break;
+
+                        foreach (var repo in batch)
+                        {
+                            allRepos.Add(repo);
+                            totalLoaded++;
+
+                            if (totalLoaded >= maxReposAllowed)
+                            {
+                                MessageBox.Show("You've reached the max supported repository limit (100,000).");
+                                break;
+                            }
+                        }
+
+                        page++;
+                    }
+
+                    if (page == safeMaxPages)
+                    {
+                        MessageBox.Show("You've reached the max page limit (1,000 pages). Some repositories may not be shown.");
                     }
                 }
             }
             catch (Exception ex)
             {
-                MessageBox.Show("Failed to load repositories.\n" + ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                MessageBox.Show("Failed to fetch repositories.\n" + ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+        }
+
+        private void ShowRepoPage(int page)
+        {
+            flowPanelRepos.Controls.Clear();
+
+            var sorted = allRepos
+                .OrderByDescending(r => (int?)r["stargazers_count"] ?? 0)
+                .ToList();
+
+            int start = (page - 1) * reposPerPage;
+            int end = Math.Min(start + reposPerPage, sorted.Count);
+
+            if (start >= sorted.Count)
+            {
+                MessageBox.Show("No more repositories.");
+                return;
+            }
+
+            for (int i = start; i < end; i++)
+            {
+                var repo = sorted[i];
+                string name = repo["name"]?.ToString();
+                string desc = repo["description"]?.ToString() ?? "No description";
+                string lang = repo["language"]?.ToString() ?? "Unknown";
+                string htmlUrl = repo["html_url"]?.ToString();
+
+                var card = CreateRepoCard(name, desc, lang, htmlUrl);
+                flowPanelRepos.Controls.Add(card);
             }
         }
 
@@ -188,6 +255,42 @@ namespace git_hub_app
             {
                 Point diff = Point.Subtract(Cursor.Position, new Size(dragCursorPoint));
                 this.Location = Point.Add(dragFormPoint, new Size(diff));
+            }
+        }
+
+        private void User_Profile_Load(object sender, EventArgs e)
+        {
+            BtnBackward.Visible = false;
+        }
+
+        private void BtnForward_Click(object sender, EventArgs e)
+        {
+            int maxPage = (int)Math.Ceiling((double)allRepos.Count / reposPerPage);
+            if (currentPage < maxPage)
+            {
+                BtnBackward.Visible = true;
+                currentPage++;
+                ShowRepoPage(currentPage);
+            }
+            else
+            {
+                BtnForward.Visible = false;
+                MessageBox.Show("You're on the last page.");
+            }
+        }
+
+        private void BtnBackward_Click(object sender, EventArgs e)
+        {
+            if (currentPage > 1)
+            {
+                BtnForward.Visible = true;
+                currentPage--;
+                ShowRepoPage(currentPage);
+            }
+            else
+            {
+                BtnBackward.Visible = false;
+                MessageBox.Show("You're on the first page.");
             }
         }
     }

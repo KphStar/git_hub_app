@@ -39,6 +39,8 @@
             this.BtnDash = new System.Windows.Forms.Button();
             this.flowPanelRepos = new System.Windows.Forms.FlowLayoutPanel();
             this.label1 = new System.Windows.Forms.Label();
+            this.BtnForward = new System.Windows.Forms.Button();
+            this.BtnBackward = new System.Windows.Forms.Button();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBoxAvatar)).BeginInit();
             this.SuspendLayout();
             // 
@@ -127,26 +129,50 @@
             // flowPanelRepos
             // 
             this.flowPanelRepos.AutoScroll = true;
-            this.flowPanelRepos.Location = new System.Drawing.Point(420, 88);
+            this.flowPanelRepos.Location = new System.Drawing.Point(381, 56);
             this.flowPanelRepos.Name = "flowPanelRepos";
-            this.flowPanelRepos.Size = new System.Drawing.Size(743, 277);
+            this.flowPanelRepos.Size = new System.Drawing.Size(754, 242);
             this.flowPanelRepos.TabIndex = 9;
             // 
             // label1
             // 
             this.label1.AutoSize = true;
             this.label1.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.label1.Location = new System.Drawing.Point(416, 65);
+            this.label1.Location = new System.Drawing.Point(381, 33);
             this.label1.Name = "label1";
-            this.label1.Size = new System.Drawing.Size(210, 20);
+            this.label1.Size = new System.Drawing.Size(130, 20);
             this.label1.TabIndex = 10;
-            this.label1.Text = "POPULAR REPOSITORIES\r\n";
+            this.label1.Text = "REPOSITORIES\r\n";
+            // 
+            // BtnForward
+            // 
+            this.BtnForward.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.BtnForward.Location = new System.Drawing.Point(801, 329);
+            this.BtnForward.Name = "BtnForward";
+            this.BtnForward.Size = new System.Drawing.Size(288, 27);
+            this.BtnForward.TabIndex = 11;
+            this.BtnForward.Text = "<<<<NEXT>>>>";
+            this.BtnForward.UseVisualStyleBackColor = true;
+            this.BtnForward.Click += new System.EventHandler(this.BtnForward_Click);
+            // 
+            // BtnBackward
+            // 
+            this.BtnBackward.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.BtnBackward.Location = new System.Drawing.Point(429, 329);
+            this.BtnBackward.Name = "BtnBackward";
+            this.BtnBackward.Size = new System.Drawing.Size(288, 27);
+            this.BtnBackward.TabIndex = 12;
+            this.BtnBackward.Text = "<<<<PREVIOUS>>>>";
+            this.BtnBackward.UseVisualStyleBackColor = true;
+            this.BtnBackward.Click += new System.EventHandler(this.BtnBackward_Click);
             // 
             // User_Profile
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(1220, 685);
+            this.ClientSize = new System.Drawing.Size(1147, 685);
+            this.Controls.Add(this.BtnBackward);
+            this.Controls.Add(this.BtnForward);
             this.Controls.Add(this.label1);
             this.Controls.Add(this.flowPanelRepos);
             this.Controls.Add(this.BtnDash);
@@ -161,6 +187,7 @@
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.Name = "User_Profile";
             this.Text = "User_Profile";
+            this.Load += new System.EventHandler(this.User_Profile_Load);
             this.MouseDown += new System.Windows.Forms.MouseEventHandler(this.User_Profile_MouseDown);
             this.MouseMove += new System.Windows.Forms.MouseEventHandler(this.User_Profile_MouseMove);
             this.MouseUp += new System.Windows.Forms.MouseEventHandler(this.User_Profile_MouseUp);
@@ -182,5 +209,7 @@
         private System.Windows.Forms.Button BtnDash;
         private System.Windows.Forms.FlowLayoutPanel flowPanelRepos;
         private System.Windows.Forms.Label label1;
+        private System.Windows.Forms.Button BtnForward;
+        private System.Windows.Forms.Button BtnBackward;
     }
 }
