@@ -182,6 +182,56 @@ namespace git_hub_app
             }
         }
 
+        private async Task OpenRepoPropForm(string repoName, string repoUrl)
+        {
+            try
+            {
+                using (HttpClient client = new HttpClient())
+                {
+                    client.DefaultRequestHeaders.UserAgent.ParseAdd("DevConnectApp");
+                    client.DefaultRequestHeaders.Authorization =
+                        new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", accessToken);
+
+                    // Fetch file list
+                    string apiUrl = $"https://api.github.com/repos/{lblUsername.Text.TrimStart('@')}/{repoName}/contents";
+                    var response = await client.GetAsync(apiUrl);
+                    string json = await response.Content.ReadAsStringAsync();
+                    JArray files = JArray.Parse(json);
+
+                    User_RepoProp propForm = new User_RepoProp();
+
+                    // Clear previous rows
+                    propForm.dataGridView1.Rows.Clear();
+
+                    foreach (var file in files)
+                    {
+                        string name = file["name"]?.ToString();
+                        string type = file["type"]?.ToString();
+                        string updatedAt = file["git_url"]?.ToString() ?? "Unknown";
+
+                        // GitHub doesn’t return updated time per file here — mock for now
+                        propForm.dataGridView1.Rows.Add(name, type, "Recently");
+
+                        // Check for README
+                        if (name.Equals("README.md", StringComparison.OrdinalIgnoreCase))
+                        {
+                            string readmeUrl = file["download_url"]?.ToString();
+                            string readmeContent = await client.GetStringAsync(readmeUrl);
+                            MessageBox.Show(readmeContent, "README.md", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                        }
+                    }
+
+                    propForm.labelTitle.Text = repoName;
+                    propForm.ShowDialog();
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Failed to load repository files.\n" + ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+        }
+
+
         private Panel CreateRepoCard(string name, string description, string language, string url)
         {
             Panel panel = new Panel
@@ -223,9 +273,14 @@ namespace git_hub_app
 
             // Make panel clickable
             panel.Cursor = Cursors.Hand;
-            panel.Click += (s, e) =>
+            //panel.Click += (s, e) =>
+            //{
+            //    Process.Start(new ProcessStartInfo(url) { UseShellExecute = true });
+            //};
+
+            panel.Click += async (s, e) =>
             {
-                Process.Start(new ProcessStartInfo(url) { UseShellExecute = true });
+                await OpenRepoPropForm(name, url);
             };
 
             return panel;

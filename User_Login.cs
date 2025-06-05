@@ -23,6 +23,12 @@ namespace git_hub_app
             DrawCustomNameGrid();
         }
 
+
+        private bool dragging = false;
+        private Point dragCursorPoint;
+        private Point dragFormPoint;
+
+
         private async Task<string> LoginAsync()
         {
             string state = Guid.NewGuid().ToString("N");
@@ -224,6 +230,25 @@ namespace git_hub_app
             }
         }
 
+        private void User_Login_MouseDown(object sender, MouseEventArgs e)
+        {
+            dragging = true;
+            dragCursorPoint = Cursor.Position;
+            dragFormPoint = this.Location;
+        }
 
+        private void User_Login_MouseMove(object sender, MouseEventArgs e)
+        {
+            if (dragging)
+            {
+                Point diff = Point.Subtract(Cursor.Position, new Size(dragCursorPoint));
+                this.Location = Point.Add(dragFormPoint, new Size(diff));
+            }
+        }
+
+        private void User_Login_MouseUp(object sender, MouseEventArgs e)
+        {
+            dragging = false;
+        }
     }
 }

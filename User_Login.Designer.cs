@@ -37,20 +37,24 @@
             // 
             // loginButton
             // 
+            this.loginButton.BackColor = System.Drawing.Color.Transparent;
             this.loginButton.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.loginButton.Font = new System.Drawing.Font("Sorts Mill Goudy", 36F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.loginButton.ForeColor = System.Drawing.Color.SkyBlue;
             this.loginButton.Location = new System.Drawing.Point(251, 62);
             this.loginButton.Name = "loginButton";
             this.loginButton.Size = new System.Drawing.Size(292, 65);
             this.loginButton.TabIndex = 6;
             this.loginButton.Text = "LOGIN";
-            this.loginButton.UseVisualStyleBackColor = true;
+            this.loginButton.UseVisualStyleBackColor = false;
             this.loginButton.Click += new System.EventHandler(this.loginButton_Click);
             // 
             // label1
             // 
             this.label1.AutoSize = true;
+            this.label1.BackColor = System.Drawing.Color.Transparent;
             this.label1.Font = new System.Drawing.Font("Mongolian Baiti", 36F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.label1.ForeColor = System.Drawing.Color.SkyBlue;
             this.label1.Location = new System.Drawing.Point(60, 9);
             this.label1.Name = "label1";
             this.label1.Size = new System.Drawing.Size(711, 50);
@@ -59,6 +63,7 @@
             // 
             // tableLayoutContrib
             // 
+            this.tableLayoutContrib.BackColor = System.Drawing.Color.Transparent;
             this.tableLayoutContrib.ColumnCount = 36;
             this.tableLayoutContrib.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 50F));
             this.tableLayoutContrib.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 50F));
@@ -113,7 +118,9 @@
             // label2
             // 
             this.label2.AutoSize = true;
+            this.label2.BackColor = System.Drawing.Color.Transparent;
             this.label2.Font = new System.Drawing.Font("Microsoft Sans Serif", 26.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.label2.ForeColor = System.Drawing.Color.SkyBlue;
             this.label2.Location = new System.Drawing.Point(12, 119);
             this.label2.Name = "label2";
             this.label2.Size = new System.Drawing.Size(179, 39);
@@ -124,6 +131,8 @@
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
+            this.BackgroundImage = global::git_hub_app.Properties.Resources.GHGray;
+            this.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Stretch;
             this.ClientSize = new System.Drawing.Size(813, 312);
             this.Controls.Add(this.label2);
             this.Controls.Add(this.tableLayoutContrib);
@@ -133,6 +142,9 @@
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.Name = "User_Login";
             this.Text = "Welcome Screen";
+            this.MouseDown += new System.Windows.Forms.MouseEventHandler(this.User_Login_MouseDown);
+            this.MouseMove += new System.Windows.Forms.MouseEventHandler(this.User_Login_MouseMove);
+            this.MouseUp += new System.Windows.Forms.MouseEventHandler(this.User_Login_MouseUp);
             this.ResumeLayout(false);
             this.PerformLayout();
 
