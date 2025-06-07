@@ -1,5 +1,7 @@
-﻿using Newtonsoft.Json.Linq;
+﻿using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 using System;
+using System.ComponentModel;
 using System.Data.Common;
 using System.Diagnostics;
 using System.Drawing;
@@ -177,12 +179,13 @@ namespace git_hub_app
                 string lang = repo["language"]?.ToString() ?? "Unknown";
                 string htmlUrl = repo["html_url"]?.ToString();
 
-                var card = CreateRepoCard(name, desc, lang, htmlUrl);
+                string fullName = repo["full_name"]?.ToString(); // e.g. joec2k/CoaScannerApp
+                var card = CreateRepoCard(name, desc, lang, fullName, htmlUrl);
                 flowPanelRepos.Controls.Add(card);
             }
         }
 
-        private async Task OpenRepoPropForm(string repoName, string repoUrl)
+        private async Task OpenRepoPropForm(string repoName, string fullName, string htmlUrl)
         {
             try
             {
@@ -192,47 +195,65 @@ namespace git_hub_app
                     client.DefaultRequestHeaders.Authorization =
                         new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", accessToken);
 
-                    // Fetch file list
-                    string apiUrl = $"https://api.github.com/repos/{lblUsername.Text.TrimStart('@')}/{repoName}/contents";
+                    string apiUrl = $"https://api.github.com/repos/{fullName}/contents";
                     var response = await client.GetAsync(apiUrl);
                     string json = await response.Content.ReadAsStringAsync();
-                    JArray files = JArray.Parse(json);
 
-                    User_RepoProp propForm = new User_RepoProp();
+                    // Debug logging
+                    Console.WriteLine($"[DEBUG] Response from {apiUrl}:\n{json}");
 
-                    // Clear previous rows
-                    propForm.dataGridView1.Rows.Clear();
-
-                    foreach (var file in files)
+                    if (!response.IsSuccessStatusCode)
                     {
-                        string name = file["name"]?.ToString();
-                        string type = file["type"]?.ToString();
-                        string updatedAt = file["git_url"]?.ToString() ?? "Unknown";
-
-                        // GitHub doesn’t return updated time per file here — mock for now
-                        propForm.dataGridView1.Rows.Add(name, type, "Recently");
-
-                        // Check for README
-                        if (name.Equals("README.md", StringComparison.OrdinalIgnoreCase))
-                        {
-                            string readmeUrl = file["download_url"]?.ToString();
-                            string readmeContent = await client.GetStringAsync(readmeUrl);
-                            MessageBox.Show(readmeContent, "README.md", MessageBoxButtons.OK, MessageBoxIcon.Information);
-                        }
+                        // Open the web browser if API access is denied or not found
+                        MessageBox.Show("API access failed. Opening repository in your browser...", "Redirecting", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                        Process.Start(new ProcessStartInfo(htmlUrl) { UseShellExecute = true });
+                        return;
                     }
 
-                    propForm.labelTitle.Text = repoName;
-                    propForm.ShowDialog();
+                    // Continue parsing if successful
+                    JToken token = JToken.Parse(json);
+
+                    if (token.Type == JTokenType.Array)
+                    {
+                        JArray files = (JArray)token;
+                        User_RepoProp propForm = new User_RepoProp();
+                        propForm.dataGridView1.Rows.Clear();
+
+                        foreach (var file in files)
+                        {
+                            string name = file["name"]?.ToString();
+                            string type = file["type"]?.ToString();
+                            string updatedAt = file["git_url"]?.ToString() ?? "Unknown";
+                            propForm.dataGridView1.Rows.Add(name, type, "Recently");
+
+                            if (name.Equals("README.md", StringComparison.OrdinalIgnoreCase))
+                            {
+                                string readmeUrl = file["download_url"]?.ToString();
+                                string readmeContent = await client.GetStringAsync(readmeUrl);
+                                MessageBox.Show(readmeContent, "README.md", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                            }
+                        }
+
+                        propForm.labelTitle.Text = fullName;
+                        propForm.ShowDialog();
+                    }
+                    else
+                    {
+                        MessageBox.Show("Unexpected data format received.", "API Error", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    }
                 }
             }
             catch (Exception ex)
             {
-                MessageBox.Show("Failed to load repository files.\n" + ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                MessageBox.Show("An unexpected error occurred.\n" + ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
 
 
-        private Panel CreateRepoCard(string name, string description, string language, string url)
+
+
+        private Panel CreateRepoCard(string name, string description, string language, string fullName, string htmlUrl)
+
         {
             Panel panel = new Panel
             {
@@ -280,10 +301,11 @@ namespace git_hub_app
 
             panel.Click += async (s, e) =>
             {
-                await OpenRepoPropForm(name, url);
+                await OpenRepoPropForm(name, fullName, htmlUrl);
             };
 
-            return panel;
+            // ❌ MISSING:
+             return panel;
         }
 
         private void BtnDash_Click(object sender, EventArgs e)
