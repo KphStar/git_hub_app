@@ -1,7 +1,9 @@
-﻿using Newtonsoft.Json.Linq;
+﻿using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 using System;
 using System.Diagnostics;
 using System.Drawing;
+using System.IO;
 using System.Net;
 using System.Net.Http;
 using System.Text;
@@ -32,13 +34,10 @@ namespace git_hub_app
         private async Task<string> LoginAsync()
         {
             string state = Guid.NewGuid().ToString("N");
-            // string authUrl = $"https://github.com/login/oauth/authorize?client_id={clientId}&redirect_uri={redirectUri}&scope=read:user&state={state}";
-               string authUrl = $"https://github.com/login/oauth/authorize?client_id={clientId}&redirect_uri={redirectUri}&scope=repo%20read:user&state={state}";
+            string authUrl = $"https://github.com/login/oauth/authorize?client_id={clientId}&redirect_uri={redirectUri}&scope=repo%20read:user&state={state}";
 
-            // Open GitHub OAuth login in browser
             Process.Start(new ProcessStartInfo(authUrl) { UseShellExecute = true });
 
-            // Start localhost listener for GitHub redirect
             var http = new HttpListener();
             http.Prefixes.Add("http://localhost:5000/callback/");
             http.Start();
@@ -48,26 +47,62 @@ namespace git_hub_app
             string code = query["code"];
             string receivedState = query["state"];
 
-            // Respond to browser
-            string html = "<html><body><h2>You may now close this window.</h2></body></html>";
-            byte[] buffer = Encoding.UTF8.GetBytes(html);
-            context.Response.ContentLength64 = buffer.Length;
-            await context.Response.OutputStream.WriteAsync(buffer, 0, buffer.Length);
-            http.Stop();
+            if (state != receivedState)
+            {
+                http.Stop();
+                return null;
+            }
 
-            if (state != receivedState) return null;
-
-            // Call your backend to exchange code for token
             using (HttpClient client = new HttpClient())
             {
                 string requestUrl = $"{backendTokenExchangeUrl}?code={code}";
                 var response = await client.GetAsync(requestUrl);
                 string content = await response.Content.ReadAsStringAsync();
-                var tokenData = JObject.Parse(content);
 
-                return tokenData["access_token"]?.ToString();
+                try
+                {
+                    var tokenData = JObject.Parse(content);
+                    string token = tokenData["access_token"]?.ToString();
+
+                    // ✅ Auto-close success HTML
+                    string successHtml = @"<html><head><script>
+                    setTimeout(() => { window.close(); }, 2500);
+                </script></head>
+                <body style='font-family:sans-serif;text-align:center;padding-top:50px'>
+                <h2>Login successful!</h2>
+                <p>This window will close automatically.</p>
+                </body></html>";
+
+                    byte[] buffer = Encoding.UTF8.GetBytes(successHtml);
+                    context.Response.ContentLength64 = buffer.Length;
+                    await context.Response.OutputStream.WriteAsync(buffer, 0, buffer.Length);
+                    http.Stop();
+
+                    return token;
+                }
+                catch (JsonReaderException)
+                {
+                    http.Stop();
+
+                    // ❌ Auto-close error HTML
+                    string errorHtml = @"<html><head><script>
+                    setTimeout(() => { window.close(); }, 1500);
+                </script></head>
+                <body style='font-family:sans-serif;text-align:center;padding-top:50px'>
+                <h2>Sorry, something went wrong.</h2>
+                <p>The application is now exiting. This window will close shortly.</p>
+                </body></html>";
+
+                    string filePath = Path.Combine(Path.GetTempPath(), "error_exit.html");
+                    File.WriteAllText(filePath, errorHtml);
+                    Process.Start(new ProcessStartInfo(filePath) { UseShellExecute = true });
+
+                    Application.Exit();
+                    return null;
+                }
             }
         }
+
 
         private async void loginButton_Click(object sender, EventArgs e)
         {
@@ -99,6 +134,7 @@ namespace git_hub_app
             else
             {
                 MessageBox.Show("Login failed.");
+                Application.Exit();
             }
         }
 
