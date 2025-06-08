@@ -24,6 +24,8 @@ namespace git_hub_app
             labelTitle.Text = "Repository Details";
         }
 
+     
+
         private void BtnExit_Click(object sender, EventArgs e)
         {
             this.Close();

@@ -185,6 +185,24 @@ namespace git_hub_app
             }
         }
 
+
+        public static string ToFriendlyTime(DateTime dt)
+        {
+            TimeSpan diff = DateTime.UtcNow - dt;
+            if (diff.TotalSeconds < 60)
+                return "just now";
+            if (diff.TotalMinutes < 60)
+                return $"{(int)diff.TotalMinutes} minutes ago";
+            if (diff.TotalHours < 24)
+                return $"{(int)diff.TotalHours} hours ago";
+            if (diff.TotalDays < 7)
+                return $"{(int)diff.TotalDays} days ago";
+            if (dt.Year == DateTime.UtcNow.Year)
+                return dt.ToString("MMM dd");
+            return dt.ToString("MMM dd, yyyy");
+        }
+
+
         private async Task OpenRepoPropForm(string repoName, string fullName, string htmlUrl)
         {
             try
@@ -199,18 +217,15 @@ namespace git_hub_app
                     var response = await client.GetAsync(apiUrl);
                     string json = await response.Content.ReadAsStringAsync();
 
-                    // Debug logging
                     Console.WriteLine($"[DEBUG] Response from {apiUrl}:\n{json}");
 
                     if (!response.IsSuccessStatusCode)
                     {
-                        // Open the web browser if API access is denied or not found
                         MessageBox.Show("API access failed. Opening repository in your browser...", "Redirecting", MessageBoxButtons.OK, MessageBoxIcon.Information);
                         Process.Start(new ProcessStartInfo(htmlUrl) { UseShellExecute = true });
                         return;
                     }
 
-                    // Continue parsing if successful
                     JToken token = JToken.Parse(json);
 
                     if (token.Type == JTokenType.Array)
@@ -223,8 +238,34 @@ namespace git_hub_app
                         {
                             string name = file["name"]?.ToString();
                             string type = file["type"]?.ToString();
-                            string updatedAt = file["git_url"]?.ToString() ?? "Unknown";
-                            propForm.dataGridView1.Rows.Add(name, type, "Recently");
+
+                            // --- Fetch commit time for each file ---
+                            string commitTimeString = "Unknown";
+                            try
+                            {
+                                string commitsApi = $"https://api.github.com/repos/{fullName}/commits?path={name}&per_page=1";
+                                var commitResponse = await client.GetAsync(commitsApi);
+                                if (commitResponse.IsSuccessStatusCode)
+                                {
+                                    string commitJson = await commitResponse.Content.ReadAsStringAsync();
+                                    var commitArr = JArray.Parse(commitJson);
+                                    if (commitArr.Count > 0)
+                                    {
+                                        var commitObj = commitArr[0];
+                                        var dateStr = commitObj["commit"]["committer"]["date"]?.ToString()
+                                                   ?? commitObj["commit"]["author"]["date"]?.ToString();
+                                        if (dateStr != null)
+                                        {
+                                            DateTime dt = DateTime.Parse(dateStr).ToUniversalTime();
+                                            commitTimeString = ToFriendlyTime(dt);
+                                        }
+                                    }
+                                }
+                            }
+                            catch { /* ignore errors per file */ }
+                            // ----------------------------------------
+
+                            propForm.dataGridView1.Rows.Add(name, type, commitTimeString);
 
                             if (name.Equals("README.md", StringComparison.OrdinalIgnoreCase))
                             {
@@ -303,8 +344,6 @@ namespace git_hub_app
             {
                 await OpenRepoPropForm(name, fullName, htmlUrl);
             };
-
-            // ❌ MISSING:
              return panel;
         }
 
