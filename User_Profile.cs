@@ -17,6 +17,7 @@ namespace git_hub_app
     public partial class User_Profile : Form
     {
         private string accessToken;
+        private Timer repoRefreshTimer;
         public User_Profile(string username, string name, string email, string avatarUrl, string bio, string token)
         {
             InitializeComponent();
@@ -52,8 +53,14 @@ namespace git_hub_app
 
             _ = InitRepoPaging(); // fire and forget
 
+            repoRefreshTimer = new Timer();
+            repoRefreshTimer.Interval = refreshIntervalSeconds * 1000;
+            repoRefreshTimer.Tick += RepoRefreshTimer_Tick;
+            repoRefreshTimer.Start();
+
 
         }
+
 
         private async Task InitRepoPaging()
         {
@@ -68,6 +75,8 @@ namespace git_hub_app
         private JArray allRepos;
         private int currentPage = 1;
         private int reposPerPage = 4;
+
+        private int refreshIntervalSeconds = 10; // How often to refresh (e.g. every 10 seconds)
 
         private Bitmap GetCircularImage(Image srcImage, int width, int height)
         {
@@ -97,6 +106,7 @@ namespace git_hub_app
         private void btnExit_Click(object sender, EventArgs e)
         {
             Application.Exit();
+            if (repoRefreshTimer != null) repoRefreshTimer.Stop();
         }
 
 
@@ -409,5 +419,29 @@ namespace git_hub_app
                 MessageBox.Show("You're on the first page.");
             }
         }
+
+        private async void RepoRefreshTimer_Tick(object sender, EventArgs e)
+        {
+            int prevRepoCount = allRepos?.Count ?? 0;
+            await FetchAllRepos();
+            int newRepoCount = allRepos?.Count ?? 0;
+            int maxPage = (int)Math.Ceiling((double)newRepoCount / reposPerPage);
+
+            // If currentPage is now too high, adjust to max
+            if (currentPage > maxPage)
+                currentPage = maxPage > 0 ? maxPage : 1;
+
+            ShowRepoPage(currentPage);
+
+            if (newRepoCount < prevRepoCount)
+            {
+                MessageBox.Show("A repository was deleted. List updated.", "Repo Deleted", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            }
+            else if (newRepoCount > prevRepoCount)
+            {
+                MessageBox.Show("New repository detected!", "New Repo Added", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            }
+        }
+
     }
 }
