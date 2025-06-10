@@ -120,5 +120,11 @@
   <ItemGroup>
     <None Include="Media\GHGray.png" />
   </ItemGroup>
+  <ItemGroup>
+    <None Include="Media\documents.ico" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Media\folder.ico" />
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>
