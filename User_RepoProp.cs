@@ -56,7 +56,7 @@ namespace git_hub_app
                 SizeMode = PictureBoxSizeMode.StretchImage,
                 Image = type == "dir"
                     ? Properties.Resources.folder // add your own icon
-                    : Properties.Resources.fileIcon   // add your own icon
+                    : Properties.Resources.documents   // add your own icon
             };
 
             Label lblName = new Label
