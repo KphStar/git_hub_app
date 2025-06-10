@@ -311,7 +311,8 @@ namespace git_hub_app
                 Height = 100,
                 BackColor = Color.White,
                 BorderStyle = BorderStyle.FixedSingle,
-                Margin = new Padding(10)
+                Margin = new Padding(10),
+                Cursor = Cursors.Hand
             };
 
             Label lblTitle = new Label
@@ -343,11 +344,23 @@ namespace git_hub_app
             panel.Controls.Add(lblDesc);
 
             // Make panel clickable
-            panel.Cursor = Cursors.Hand;
             panel.Click += async (s, e) =>
             {
-                await OpenRepoPropForm(name, fullName, htmlUrl);
-            };
+                //Cursor.Current = Cursors.WaitCursor; // Show spinner
+                this.Cursor = Cursors.WaitCursor;
+                panel.Enabled = false; // Optional: prevent double click
+
+                try
+                {
+                    await OpenRepoPropForm(name, fullName, htmlUrl);
+                }
+                finally
+                {
+                    // Cursor.Current = Cursors.Default; // Restore cursor
+                    this.Cursor = Cursors.Default;
+                    panel.Enabled = true;
+                }
+            }; ;
              return panel;
         }
 
