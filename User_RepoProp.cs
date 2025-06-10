@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
 using System.Drawing;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -55,8 +56,8 @@ namespace git_hub_app
                 Location = new Point(10, 15),
                 SizeMode = PictureBoxSizeMode.StretchImage,
                 Image = type == "dir"
-                    ? Properties.Resources.folder // add your own icon
-                    : Properties.Resources.documents   // add your own icon
+    ? Image.FromFile(Path.Combine(Application.StartupPath, "Icons", "folder.ico"))
+    : Image.FromFile(Path.Combine(Application.StartupPath, "Icons", "documents.ico"))
             };
 
             Label lblName = new Label
