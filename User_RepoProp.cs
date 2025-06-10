@@ -17,12 +17,9 @@ namespace git_hub_app
         {
             InitializeComponent();
 
-            dataGridView1.ColumnCount = 3;
-            dataGridView1.Columns[0].Name = "Name";
-            dataGridView1.Columns[1].Name = "Type";
-            dataGridView1.Columns[2].Name = "Last Updated";
-
             labelTitle.Text = "Repository Details";
+
+           
         }
 
 
@@ -55,9 +52,9 @@ namespace git_hub_app
                 Height = 28,
                 Location = new Point(10, 15),
                 SizeMode = PictureBoxSizeMode.StretchImage,
-                Image = type == "dir"
-    ? Image.FromFile(Path.Combine(Application.StartupPath, "Icons", "folder.ico"))
-    : Image.FromFile(Path.Combine(Application.StartupPath, "Icons", "documents.ico"))
+    //            Image = type == "dir"
+    //? Image.FromFile(Path.Combine(Application.StartupPath, "Media", "folder.ico"))
+    //: Image.FromFile(Path.Combine(Application.StartupPath, "Media", "documents.ico"))
             };
 
             Label lblName = new Label
@@ -99,7 +96,7 @@ namespace git_hub_app
         private void BtnExit_Click(object sender, EventArgs e)
         {
             this.Close();
-            dataGridView1.Rows.Clear();
+            flowPanelFiles.Controls.Clear();    
             labelTitle.Text = "Repository Details";
         }
 

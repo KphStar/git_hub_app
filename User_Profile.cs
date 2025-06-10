@@ -1,6 +1,7 @@
 ﻿using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using System;
+using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data.Common;
 using System.Diagnostics;
@@ -242,14 +243,17 @@ namespace git_hub_app
                     {
                         JArray files = (JArray)token;
                         User_RepoProp propForm = new User_RepoProp();
-                        propForm.dataGridView1.Rows.Clear();
+            
+                        var fileCards = new List<(string, string, string)>();
 
                         foreach (var file in files)
                         {
+                            
+
                             string name = file["name"]?.ToString();
                             string type = file["type"]?.ToString();
 
-                            // --- Fetch commit time for each file ---
+                            // Commit time logic as before:
                             string commitTimeString = "Unknown";
                             try
                             {
@@ -272,21 +276,16 @@ namespace git_hub_app
                                     }
                                 }
                             }
-                            catch { /* ignore errors per file */ }
-                            // ----------------------------------------
+                            catch { }
 
-                            propForm.dataGridView1.Rows.Add(name, type, commitTimeString);
-
-                            if (name.Equals("README.md", StringComparison.OrdinalIgnoreCase))
-                            {
-                                string readmeUrl = file["download_url"]?.ToString();
-                                string readmeContent = await client.GetStringAsync(readmeUrl);
-                                MessageBox.Show(readmeContent, "README.md", MessageBoxButtons.OK, MessageBoxIcon.Information);
-                            }
+                            fileCards.Add((name, type, commitTimeString));
                         }
 
+                        // Show the modern card UI:
+                        User_RepoProp User_propForm = new User_RepoProp();
+                        User_propForm.ShowFileCards(fileCards);
                         propForm.labelTitle.Text = fullName;
-                        propForm.ShowDialog();
+                        User_propForm.Show();
                     }
                     else
                     {
@@ -345,11 +344,6 @@ namespace git_hub_app
 
             // Make panel clickable
             panel.Cursor = Cursors.Hand;
-            //panel.Click += (s, e) =>
-            //{
-            //    Process.Start(new ProcessStartInfo(url) { UseShellExecute = true });
-            //};
-
             panel.Click += async (s, e) =>
             {
                 await OpenRepoPropForm(name, fullName, htmlUrl);
@@ -391,6 +385,8 @@ namespace git_hub_app
 
         private void BtnForward_Click(object sender, EventArgs e)
         {
+          
+
             int maxPage = (int)Math.Ceiling((double)allRepos.Count / reposPerPage);
             if (currentPage < maxPage)
             {
@@ -400,13 +396,17 @@ namespace git_hub_app
             }
             else
             {
-                BtnForward.Visible = false;
-                MessageBox.Show("You're on the last page.");
+                // Instead of showing MessageBox here, just clamp and quietly ignore
+                currentPage = maxPage > 0 ? maxPage : 1;
+                // Optionally show a non-intrusive toast/snackbar message instead
             }
         }
+      
 
         private void BtnBackward_Click(object sender, EventArgs e)
         {
+           
+
             if (currentPage > 1)
             {
                 BtnForward.Visible = true;
@@ -415,21 +415,25 @@ namespace git_hub_app
             }
             else
             {
-                BtnBackward.Visible = false;
-                MessageBox.Show("You're on the first page.");
+                currentPage = 1;
+                // Optionally, no MessageBox
             }
         }
 
         private async void RepoRefreshTimer_Tick(object sender, EventArgs e)
         {
+           
+
             int prevRepoCount = allRepos?.Count ?? 0;
             await FetchAllRepos();
             int newRepoCount = allRepos?.Count ?? 0;
             int maxPage = (int)Math.Ceiling((double)newRepoCount / reposPerPage);
 
-            // If currentPage is now too high, adjust to max
+            // Clamp currentPage to be in valid range
             if (currentPage > maxPage)
                 currentPage = maxPage > 0 ? maxPage : 1;
+            if (currentPage < 1)
+                currentPage = 1;
 
             ShowRepoPage(currentPage);
 

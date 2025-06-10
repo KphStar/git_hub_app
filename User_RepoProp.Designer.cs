@@ -38,9 +38,10 @@
             // 
             // BtnExit
             // 
-            this.BtnExit.Location = new System.Drawing.Point(872, 531);
+            this.BtnExit.Font = new System.Drawing.Font("Microsoft Sans Serif", 27.75F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.BtnExit.Location = new System.Drawing.Point(776, 531);
             this.BtnExit.Name = "BtnExit";
-            this.BtnExit.Size = new System.Drawing.Size(260, 49);
+            this.BtnExit.Size = new System.Drawing.Size(356, 49);
             this.BtnExit.TabIndex = 0;
             this.BtnExit.Text = "EXIT";
             this.BtnExit.UseVisualStyleBackColor = true;
@@ -57,19 +58,19 @@
             // labelTitle
             // 
             this.labelTitle.AutoSize = true;
-            this.labelTitle.Location = new System.Drawing.Point(12, 9);
+            this.labelTitle.Font = new System.Drawing.Font("Microsoft Sans Serif", 20.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.labelTitle.Location = new System.Drawing.Point(503, 9);
             this.labelTitle.Name = "labelTitle";
-            this.labelTitle.Size = new System.Drawing.Size(35, 13);
+            this.labelTitle.Size = new System.Drawing.Size(92, 31);
             this.labelTitle.TabIndex = 2;
             this.labelTitle.Text = "label1";
             // 
             // flowPanelFiles
             // 
             this.flowPanelFiles.AutoScroll = true;
-            this.flowPanelFiles.Dock = System.Windows.Forms.DockStyle.Top;
-            this.flowPanelFiles.Location = new System.Drawing.Point(0, 0);
+            this.flowPanelFiles.Location = new System.Drawing.Point(-1, 45);
             this.flowPanelFiles.Name = "flowPanelFiles";
-            this.flowPanelFiles.Size = new System.Drawing.Size(1144, 525);
+            this.flowPanelFiles.Size = new System.Drawing.Size(1147, 480);
             this.flowPanelFiles.TabIndex = 3;
             // 
             // User_RepoProp
